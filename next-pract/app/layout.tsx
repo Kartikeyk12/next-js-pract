@@ -26,6 +26,9 @@ import Header from "../app/components/Header";
 import Footer from "../app/components/Footer";
 import { SidebarProvider } from "../app/context/SidebarContext";
 import { ThemeProvider } from "../app/context/ThemeContext";
+export const metadata = {
+  title: 'Tech Related Next'
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
