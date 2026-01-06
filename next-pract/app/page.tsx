@@ -6,6 +6,7 @@ export default function Home() {
     { href: "/product", label: "Products" },
     { href: "/blogs", label: "Blogs" },
     { href: "/files", label: "All Files CRUD" },
+    { href: "/intercepting-concept", label: "Explore Intercepting Routes →" },
   ];
 
   return (

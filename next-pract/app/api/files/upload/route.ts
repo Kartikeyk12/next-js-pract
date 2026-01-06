@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+/** 
+ * Similar to GET and DELETE methods, this POST method handles file uploads.
+ * It processes multipart/form-data requests, saves the uploaded file to the specified directory,
+ * and creates the directory if it doesn't exist.
+ * ? SIMILAR TO Node.js + Express file upload handling but using Next.js 13+ route handlers.
+**/
+
 export async function POST(req: Request) {
   const form = await req.formData();
   const file = form.get("file") as File;

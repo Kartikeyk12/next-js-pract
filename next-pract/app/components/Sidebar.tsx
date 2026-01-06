@@ -11,11 +11,14 @@ const menuItems = [
 
 export default function Sidebar() {
   const { isOpen, toggle } = useSidebar();
+  function navigateHome() {
+    window.location.href = "/";
+  }
 
   return (
     <aside className={`transition-all duration-300 flex flex-col ${isOpen ? "w-64" : "w-16"} bg-purple-200 dark:bg-gray-900 text-black dark:text-white`}>
       <div className="flex items-center justify-between p-4 border-b border-purple-300">
-        <span className={`${isOpen ? "block" : "hidden"} font-bold text-lg`}>Logo</span>
+        <span onClick={navigateHome} className={`${isOpen ? "block" : "hidden"} font-bold text-lg`}>Logo</span>
         <button onClick={toggle} className="text-black focus:outline-none dark:text-white">
           {isOpen ? "⮜" : "⮞"}
         </button>

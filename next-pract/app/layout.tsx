@@ -29,6 +29,7 @@ import { ThemeProvider } from "../app/context/ThemeContext";
 export const metadata = {
   title: 'Tech Related Next'
 }
+// import { ErrorWrapper } from './error-wrapper';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -56,7 +57,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Sidebar />
             <div className="flex-1 flex flex-col">
               <Header />
-              <main className="flex-1 p-6 overflow-auto">{children}</main>
+              <main className="flex-1 p-6 overflow-auto">
+                {children}
+                {/* <ErrorWrapper>{children}</ErrorWrapper>  */} {/* Optional Error Boundary */}
+              </main>
               <Footer />
             </div>
           </SidebarProvider>

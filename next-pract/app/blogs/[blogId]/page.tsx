@@ -4,12 +4,12 @@ export const dynamicParams = false; // *this is to stop generation of pages at r
 
 // * This function is used to generate the list of paths that need to be statically generated at build time (also known as pre-rendering or SSG - Static Site Generation).
 // * To check SSG pages goto - build > server > pages > blogs > [blogId].html
-export async function generateStaticParams() {
-  const response = await fetch('https://jsonplaceholder.typicode.com/todos');
-  const blogs = await response.json();
-  console.log(blogs);
-  return blogs.map((blog: { id: unknown; }) => ({ blogId: String(blog.id) }));
-}
+// export async function generateStaticParams() {
+//   const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+//   const blogs = await response.json();
+//   console.log(blogs);
+//   return blogs.map((blog: { id: unknown; }) => ({ blogId: String(blog.id) }));
+// }
 
 export default async function BlogDetails({
   params,

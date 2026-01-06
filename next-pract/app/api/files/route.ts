@@ -1,3 +1,13 @@
+/**
+ * * API route to handle file listing and deletion in the uploads directory. 
+ * * this is an example of a ROUTE HANDLER in Next.js 13+.
+ * ? Route handlers allow you to create API endpoints using the same file-based routing system as pages
+ * ? and components. It lets you build restful endpoints with complete control over request and response handling.
+ * * Features: keys are secure as it runs on server side.
+ * * - No need to create seperate server.
+ */
+
+
 import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'

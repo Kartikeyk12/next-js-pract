@@ -18,9 +18,10 @@ This document explains all the Next.js concepts used in this project. The langua
 10. [Navigation](#10-navigation)
 11. [Metadata](#11-metadata)
 12. [Static Site Generation (SSG)](#12-static-site-generation-ssg)
-13. [Context API](#13-context-api)
-14. [File Uploads](#14-file-uploads)
-15. [Hydration](#15-hydration)
+13. [Incremental Static Regeneration (ISR)](#13-incremental-static-regeneration-isr)
+14. [Context API](#14-context-api)
+15. [File Uploads](#15-file-uploads)
+16. [Hydration](#16-hydration)
 
 ---
 
@@ -316,7 +317,52 @@ This prevents Next.js from generating pages at runtime that weren't pre-generate
 
 ---
 
-## 13. Context API
+## 13. Incremental Static Regeneration (ISR)
+
+### What is it?
+ISR lets you update static pages after they've been built, without rebuilding the entire site. Pages are regenerated in the background when someone visits them, but only if a certain time has passed since the last generation.
+
+### How it works:
+- Pages are generated at build time (like SSG)
+- After a set time period (revalidate), Next.js regenerates the page in the background
+- Users always get fast static pages, but the content stays fresh
+
+### How it could be used in this project:
+Currently, the blog pages use pure SSG. To add ISR, you would add a `revalidate` option:
+
+```tsx
+// app/blogs/[blogId]/page.tsx
+export const revalidate = 3600; // Revalidate every hour (3600 seconds)
+
+export async function generateStaticParams() {
+  const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+  const blogs = await response.json();
+  return blogs.map((blog) => ({ blogId: String(blog.id) }));
+}
+
+export default async function BlogDetails({ params }) {
+  const blogId = (await params).blogId;
+  // This page will be regenerated every hour if someone visits it
+  return <h1>Blog {blogId}</h1>;
+}
+```
+
+### Alternative: Per-request revalidation
+You can also set revalidate on individual fetch calls:
+
+```tsx
+const response = await fetch('https://api.example.com/data', {
+  next: { revalidate: 60 } // Revalidate this data every 60 seconds
+});
+```
+
+### Difference from SSG:
+- **SSG**: Pages are generated once at build time and never update until you rebuild
+- **ISR**: Pages are generated at build time, but can be regenerated automatically after a time period
+
+---
+
+## 14. Context API
 
 ### What is it?
 React Context lets you share data across components without passing props through every level. In this project, it's used for theme and sidebar state.
@@ -345,7 +391,7 @@ const { darkMode, toggleTheme } = useTheme();
 
 ---
 
-## 14. File Uploads
+## 15. File Uploads
 
 ### What is it?
 Handling file uploads from the browser to the server using FormData and API routes.
@@ -375,7 +421,7 @@ export async function POST(req: Request) {
 
 ---
 
-## 15. Hydration
+## 16. Hydration
 
 ### What is it?
 Hydration is when React "wakes up" server-rendered HTML in the browser. Sometimes there can be mismatches between server and client HTML.
@@ -447,7 +493,58 @@ export async function generateStaticParams() {
 
 ---
 
-## Q7: How do you handle file uploads in Next.js?
+## Q7: What is Incremental Static Regeneration (ISR)?
+**Answer:** ISR allows you to update static pages after build time without rebuilding the entire site. You set a `revalidate` time (in seconds), and Next.js will regenerate the page in the background after that time has passed when someone visits it.
+
+**Example:**
+```tsx
+export const revalidate = 3600; // Revalidate every hour
+
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data}</div>;
+}
+```
+
+**Benefits:**
+- Fast static pages (like SSG)
+- Fresh content without full rebuilds
+- Automatic background regeneration
+
+---
+
+## Q8: What's the difference between SSG and ISR?
+**Answer:**
+- **SSG**: Pages are generated once at build time and never change until you rebuild the entire site
+- **ISR**: Pages are generated at build time, but can be automatically regenerated in the background after a set time period (revalidate)
+
+**When to use:**
+- **SSG**: Content that rarely changes (documentation, blog posts that are finalized)
+- **ISR**: Content that changes occasionally (product listings, news articles, user-generated content)
+
+---
+
+## Q9: How do you implement ISR in Next.js?
+**Answer:** Add a `revalidate` export to your page or use `next: { revalidate }` in fetch options.
+
+**Method 1 - Page-level:**
+```tsx
+export const revalidate = 60; // Revalidate every 60 seconds
+export default async function Page() {
+  // Page content
+}
+```
+
+**Method 2 - Fetch-level:**
+```tsx
+const data = await fetch('https://api.example.com/data', {
+  next: { revalidate: 60 }
+});
+```
+
+---
+
+## Q10: How do you handle file uploads in Next.js?
 **Answer:** 
 1. Create a form with file input on the client
 2. Use FormData to send the file
@@ -469,14 +566,14 @@ const file = form.get("file") as File;
 
 ---
 
-## Q8: What are route groups?
+## Q11: What are route groups?
 **Answer:** Route groups use parentheses `()` in folder names. They organize routes without affecting the URL. Useful for grouping related pages or applying different layouts.
 
 **Example:** `app/(auth)/login/page.tsx` creates `/login`, not `/(auth)/login`.
 
 ---
 
-## Q9: How do you use Context API in Next.js?
+## Q12: How do you use Context API in Next.js?
 **Answer:** 
 1. Create a context with `createContext`
 2. Create a provider component (must be Client Component)
@@ -487,12 +584,12 @@ const file = form.get("file") as File;
 
 ---
 
-## Q10: What is suppressHydrationWarning?
+## Q13: What is suppressHydrationWarning?
 **Answer:** `suppressHydrationWarning` is an HTML attribute that prevents React from warning about differences between server and client HTML. Useful when you intentionally have differences, like theme classes that are added on the client.
 
 ---
 
-## Q11: How do you create API routes in Next.js App Router?
+## Q14: How do you create API routes in Next.js App Router?
 **Answer:** Create a `route.ts` file in `app/api/your-route/` folder. Export functions named after HTTP methods (GET, POST, DELETE, etc.). Use `NextResponse` to return responses.
 
 **Example:**
@@ -510,7 +607,7 @@ export async function POST(req: Request) {
 
 ---
 
-## Q12: What's the difference between Link and useRouter?
+## Q15: What's the difference between Link and useRouter?
 **Answer:**
 - **Link**: A component for navigation. Use it for links in JSX. It prefetches pages and provides better performance.
 - **useRouter**: A hook for programmatic navigation. Use it when you need to navigate based on logic (like after form submission).
@@ -528,7 +625,7 @@ router.back();
 
 ---
 
-## Q13: How do you access route parameters in Client Components?
+## Q16: How do you access route parameters in Client Components?
 **Answer:** Use the `useParams` hook from `next/navigation`. It returns an object with all dynamic route parameters.
 
 **Example:**
@@ -545,7 +642,7 @@ export default function Page() {
 
 ---
 
-## Q14: What is metadata in Next.js?
+## Q17: What is metadata in Next.js?
 **Answer:** Metadata is information about your page (title, description, etc.) that helps with SEO and browser display. You export a `metadata` object from layouts or pages.
 
 **Example:**
@@ -558,7 +655,7 @@ export const metadata = {
 
 ---
 
-## Q15: Why are params a Promise in Next.js 15+?
+## Q18: Why are params a Promise in Next.js 15+?
 **Answer:** In Next.js 15, `params` became a Promise to support async route resolution and better streaming. You must `await` params before using them. This allows Next.js to optimize how routes are resolved.
 
 **Example:**
@@ -578,7 +675,7 @@ export default function Page({ params }) {
 
 ---
 
-## Q16: How do you handle multiple dynamic segments?
+## Q19: How do you handle multiple dynamic segments?
 **Answer:** Create nested folders with brackets. For example, `app/product/[productId]/reviews/[reviewId]/page.tsx` creates routes like `/product/123/reviews/5`. Access both in params.
 
 **Example:**
@@ -591,14 +688,14 @@ export default async function Page({ params }) {
 
 ---
 
-## Q17: What's the difference between catch-all and optional catch-all routes?
+## Q20: What's the difference between catch-all and optional catch-all routes?
 **Answer:**
 - **Catch-all** `[...slug]`: Must match at least one segment. `/files/[...slug]` won't match `/files`.
 - **Optional catch-all** `[[...slug]]`: Can match zero or more segments. `/files/[[...slug]]` matches both `/files` and `/files/folder1`.
 
 ---
 
-## Q18: How do you prevent hydration mismatches?
+## Q21: How do you prevent hydration mismatches?
 **Answer:** 
 1. Use `suppressHydrationWarning` on elements with intentional differences
 2. Initialize state from localStorage in `useEffect`, not during render
@@ -613,12 +710,12 @@ export default async function Page({ params }) {
 
 ---
 
-## Q19: Can you use hooks in Server Components?
+## Q22: Can you use hooks in Server Components?
 **Answer:** No. Server Components cannot use React hooks (useState, useEffect, etc.) or browser APIs. Hooks only work in Client Components. If you need hooks, add `"use client"` to your component.
 
 ---
 
-## Q20: How do you structure a Next.js App Router project?
+## Q23: How do you structure a Next.js App Router project?
 **Answer:**
 ```
 app/
@@ -635,23 +732,3 @@ app/
   │       └── route.ts    # /api/files
   └── components/         # Shared components
 ```
-
----
-
-## Summary
-
-This project demonstrates:
-- ✅ App Router file-based routing
-- ✅ Server and Client Components
-- ✅ Dynamic and catch-all routes
-- ✅ API routes with multiple HTTP methods
-- ✅ Static Site Generation (SSG)
-- ✅ Context API for state management
-- ✅ File uploads
-- ✅ Navigation (Link, useRouter, useParams)
-- ✅ Layouts and metadata
-- ✅ Route groups
-- ✅ Hydration handling
-
-All these concepts work together to build a modern, fast, and scalable Next.js application!
-
